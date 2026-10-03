@@ -293,12 +293,38 @@ function saveLocal() {
  }
 }
 
+function applyState(s) {
+ if (!s || typeof s !== "object") return false;
+
+ ["deposit","price","lev","lcRate","swap","days"].forEach(id => {
+   if (s[id] !== undefined && s[id] !== null) {
+     $(id).value = s[id];
+   }
+ });
+
+ positions.innerHTML = "";
+ if (Array.isArray(s.positions) && s.positions.length) {
+   s.positions.forEach(p => {
+     if (p && p.price !== undefined && p.qty !== undefined) {
+       addRow(p.price, p.qty);
+     }
+   });
+ }
+
+ if (!positions.children.length) {
+   initial.forEach(x => addRow(x[0], x[1]));
+ }
+ return true;
+}
+
 function loadLocal() {
  try {
    const raw = localStorage.getItem(STORAGE_KEY);
-   if (raw) applyState(JSON.parse(raw));
+   if (!raw) return false;
+   return applyState(JSON.parse(raw));
  } catch(e) {
-   $("saveStatus").textContent = "保存データを読み込めませんでした。";
+   console.error("Failed to load local settings:", e);
+   return false;
  }
 }
 
@@ -344,13 +370,11 @@ function update() {
 }
 
 
-loadLocal();
+const loaded = loadLocal();
 update();
-if (localStorage.getItem(STORAGE_KEY)) {
-  $("saveStatus").textContent = "前回の設定を自動読み込みしました。";
-} else {
-  $("saveStatus").textContent = "初期設定を使用しています。";
-}
+$("saveStatus").textContent = loaded
+  ? "前回の設定を自動読み込みしました。"
+  : "初期設定を使用しています。";
 })();
 </script>
 </body>
