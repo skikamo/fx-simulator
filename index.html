@@ -267,6 +267,41 @@ function drawChart() {
  t.textContent=cur.toFixed(3);
 }
 
+const STORAGE_KEY = "fx-simulator-v2";
+
+function collectState() {
+ return {
+   deposit: $("deposit").value,
+   price: $("price").value,
+   lev: $("lev").value,
+   lcRate: $("lcRate").value,
+   swap: $("swap").value,
+   days: $("days").value,
+   positions: [...positions.querySelectorAll(".position")].map(row => ({
+     price: row.querySelector(".entry").value,
+     qty: row.querySelector(".qty").value
+   }))
+ };
+}
+
+function saveLocal() {
+ try {
+   localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+   $("saveStatus").textContent = "自動保存済み";
+ } catch(e) {
+   $("saveStatus").textContent = "自動保存を利用できません。";
+ }
+}
+
+function loadLocal() {
+ try {
+   const raw = localStorage.getItem(STORAGE_KEY);
+   if (raw) applyState(JSON.parse(raw));
+ } catch(e) {
+   $("saveStatus").textContent = "保存データを読み込めませんでした。";
+ }
+}
+
 function update() {
  const rate=Math.max(0.001,parseFloat($("price").value)||157.670);
  const m=metrics(rate);
@@ -305,64 +340,8 @@ function update() {
  }).join("");
 
  drawChart();
-}
-
-
-const STORAGE_KEY = "fx-simulator-v2";
-
-function collectState() {
- return {
-   deposit: $("deposit").value,
-   price: $("price").value,
-   lev: $("lev").value,
-   lcRate: $("lcRate").value,
-   swap: $("swap").value,
-   days: $("days").value,
-   positions: [...positions.querySelectorAll(".position")].map(row => ({
-     price: row.querySelector(".entry").value,
-     qty: row.querySelector(".qty").value
-   }))
- };
-}
-
-function applyState(s) {
- if (!s || typeof s !== "object") return;
- ["deposit","price","lev","lcRate","swap","days"].forEach(id => {
-   if (s[id] !== undefined) $(id).value = s[id];
- });
- positions.innerHTML = "";
- if (Array.isArray(s.positions) && s.positions.length) {
-   s.positions.forEach(p => addRow(p.price, p.qty));
- } else {
-   initial.forEach(x => addRow(x[0], x[1]));
- }
- update();
-}
-
-function saveLocal() {
- try {
-   localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
-   $("saveStatus").textContent = "自動保存済み";
- } catch(e) {
-   $("saveStatus").textContent = "自動保存を利用できません。設定保存を使ってください。";
- }
-}
-
-function loadLocal() {
- try {
-   const raw = localStorage.getItem(STORAGE_KEY);
-   if (raw) applyState(JSON.parse(raw));
- } catch(e) {
-   $("saveStatus").textContent = "保存データを読み込めませんでした。";
- }
-}
-
-const originalUpdate = update;
-update = function() {
- originalUpdate();
  saveLocal();
-};
-
+}
 
 
 loadLocal();
