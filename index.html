@@ -8,30 +8,34 @@
 :root{--bg:#0d1020;--panel:#151932;--panel2:#1c2040;--border:#303654;--text:#f3f4fa;--muted:#aeb2c8;--accent:#29a8f2;--good:#38d0c8;--bad:#ef4d72}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-main{width:min(900px,100%);margin:auto;padding:20px}
-h1{font-size:26px;margin:0 0 18px}
-h2{font-size:17px;margin:0 0 14px}
-.section{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+main{width:min(760px,100%);margin:auto;padding:14px}
+h1{font-size:22px;margin:0 0 12px}
+h2{font-size:15px;margin:0 0 10px}
+.section{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-width:560px}
+label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 input,button{font:inherit}
-input{width:100%;height:44px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);padding:8px 11px;font-size:16px}
+input{width:100%;height:36px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);padding:5px 9px;font-size:15px}
 input:focus{outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent);border-color:var(--accent)}
-button{min-height:42px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);padding:7px 13px;cursor:pointer;font-weight:600}
+button{min-height:36px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);padding:7px 13px;cursor:pointer;font-weight:600}
 button:hover{border-color:var(--accent)}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.positions-head,.position{display:grid;grid-template-columns:1fr 1fr 44px;gap:8px;align-items:end}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.positions-head,.position{display:grid;grid-template-columns:1fr 1fr 38px;gap:6px;align-items:end}
 .positions-head{font-size:12px;color:var(--muted);margin-bottom:6px}
-.position{margin-bottom:8px}
-.position button{height:44px;font-size:20px;color:var(--muted)}
+.position{margin-bottom:6px}
+.position button{height:36px;font-size:20px;color:var(--muted)}
 .position button:hover{color:var(--bad);border-color:var(--bad)}
-.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.result{background:var(--panel2);border-radius:10px;padding:12px;min-width:0}
-.result .key{font-size:12px;color:var(--muted)}
-.result .value{font-size:20px;font-weight:700;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.results{display:grid;grid-template-columns:1fr;gap:0}
+.result{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:7px 2px;border-bottom:1px solid var(--border);min-width:0}
+.result:first-child{padding-top:2px}
+.result:last-child{border-bottom:0;padding-bottom:2px}
+.result .key{font-size:11px;color:var(--muted)}
+.result .value{font-size:20px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.result.small .value{font-size:14px}
+.result.small .key{font-size:10px}
 .good{color:var(--good)}.bad{color:var(--bad)}
-.status{font-size:13px;margin-top:10px;color:var(--muted)}
-.note{font-size:12px;line-height:1.65;color:var(--muted);margin-top:10px}
+.status{font-size:12px;margin-top:10px;color:var(--muted)}
+.note{font-size:11px;line-height:1.65;color:var(--muted);margin-top:10px}
 .chartbox{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px;overflow:hidden}
 svg{width:100%;height:280px;display:block}
 svg text{font-family:inherit;fill:var(--muted);font-size:11px}
@@ -43,20 +47,21 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 .cell{background:var(--panel2);border-radius:8px;padding:8px;text-align:center}
 .cell .rate{font-size:12px;color:var(--muted)}.cell .pl{font-size:13px;font-weight:700;margin-top:4px}
 @media(max-width:600px){
- main{padding:12px}.grid{grid-template-columns:1fr}.results{grid-template-columns:repeat(2,1fr)}
- .scenario{grid-template-columns:repeat(3,1fr)}svg{height:230px}
+ main{padding:9px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:none}.results{grid-template-columns:1fr}
+ .scenario{grid-template-columns:repeat(3,1fr)}svg{height:210px}
+ input{font-size:14px}.result{padding:7px 2px}.result .value{font-size:18px}
 }
 </style>
 </head>
 <body>
 <main>
-<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:14px">
 <h1 style="margin:0">FX Simulator</h1>
-
+<div id="saveStatus" style="font-size:11px;color:var(--muted);text-align:right;line-height:1.3;max-width:240px">設定はこのiPhoneのブラウザに自動保存されます。</div>
 </div>
 
 <section class="section">
-<div class="grid">
+<div class="grid settings-grid">
 <div><label>預託保証金 (JPY)</label><input id="deposit" type="number" min="0" step="1" value="10312857"></div>
 <div><label>現在のドル/円</label><input id="price" type="number" min="0.001" step="0.001" value="157.670"></div>
 <div><label>レバレッジコース</label><input id="lev" type="number" min="0.01" step="1" value="10"></div>
@@ -66,26 +71,24 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 </div>
 </section>
 
-<div id="saveStatus" style="font-size:12px;color:var(--muted);margin:-5px 2px 10px">設定はこのiPhoneのブラウザに自動保存されます。</div>
-
 <section class="section">
-<div class="toolbar"><h2>建玉一覧（買い）</h2><button id="add" type="button">+ 建玉を追加</button></div>
-<div class="positions-head"><span>建玉単価</span><span>数量 (USD)</span><span></span></div>
+<div class="toolbar"><h2>建玉一覧 <span style="font-size:11px;color:var(--muted);font-weight:400">(+買い / -売り)</span></h2><button id="add" type="button">+ 建玉を追加</button></div>
+<div class="positions-head"><span>建玉単価</span><span>数量 (万通貨) +買い / -売り</span><span></span></div>
 <div id="positions"></div>
-<div class="note">建玉単価は取得時のドル/円、数量はUSDです。平均スワップポイントと平均経過日数は全建玉に適用します。</div>
+<div class="note">数量は + が買い、- が売りです。平均スワップポイントと平均経過日数は全建玉に適用します。</div>
 </section>
 
 <section class="section">
 <div class="results">
 <div class="result"><div class="key">総合評価損益</div><div id="pl" class="value">-</div></div>
-<div class="result"><div class="key">価格変動損益</div><div id="pricePl" class="value">-</div></div>
-<div class="result"><div class="key">スワップ損益</div><div id="swapPl" class="value">-</div></div>
+<div class="result small"><div class="key">価格変動損益</div><div id="pricePl" class="value">-</div></div>
+<div class="result small"><div class="key">スワップ損益</div><div id="swapPl" class="value">-</div></div>
 <div class="result"><div class="key">実質保証金</div><div id="equity" class="value">-</div></div>
 <div class="result"><div class="key">必要保証金</div><div id="margin" class="value">-</div></div>
 <div class="result"><div class="key">建玉余力</div><div id="free" class="value">-</div></div>
-<div class="result"><div class="key">実効レバレッジ</div><div id="efflev" class="value">-</div></div>
-<div class="result"><div class="key">建玉金額</div><div id="notional" class="value">-</div></div>
-<div class="result"><div class="key">ロスカット ドル/円</div><div id="lc" class="value bad">-</div></div>
+<div class="result small"><div class="key">実効レバレッジ</div><div id="efflev" class="value">-</div></div>
+<div class="result small"><div class="key">建玉金額</div><div id="notional" class="value">-</div></div>
+<div class="result small"><div class="key">ロスカット ドル/円</div><div id="lc" class="value bad">-</div></div>
 </div>
 <div id="status" class="status"></div>
 </section>
@@ -99,11 +102,11 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <section class="section">
 <div class="note">
 <strong>計算方法</strong><br>
-価格変動損益 = Σ(現在レート - 建玉単価) × 数量<br>
-スワップ損益 = 合計建玉数量 ÷ 10,000 × 平均スワップポイント × 平均経過日数<br>
+価格変動損益 = Σ(現在レート - 建玉単価) × 数量(万通貨) × 10,000<br>
+スワップ損益 = 合計建玉数量(万通貨) × 平均スワップポイント × 平均経過日数<br>
 総合評価損益 = 価格変動損益 + スワップ損益<br>
 実質保証金 = 預託保証金 + 総合評価損益<br>
-必要保証金 = 建玉金額 ÷ レバレッジ<br>
+必要保証金 = Σ(|現在レート × 数量(万通貨) × 10,000|) ÷ レバレッジ<br>
 建玉余力 = 実質保証金 - 必要保証金<br>
 実効レバレッジ = 建玉金額 ÷ 実質保証金<br>
 ロスカットレート = 実質保証金が必要保証金 × ロスカット率になるドル/円
@@ -118,11 +121,11 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 const $ = id => document.getElementById(id);
 const positions = $("positions");
 const initial = [
- [156.900,100000],
- [157.700,50000],
- [158.500,100000],
- [158.600,100000],
- [159.200,100000]
+ [156.900,10],
+ [157.700,5],
+ [158.500,10],
+ [158.600,10],
+ [159.200,10]
 ];
 
 function addRow(rate, qty) {
@@ -130,7 +133,7 @@ function addRow(rate, qty) {
  row.className = "position";
  row.innerHTML =
    '<input class="entry" type="number" min="0.001" step="0.001" value="' + rate + '">' +
-   '<input class="qty" type="number" min="0" step="1000" value="' + qty + '">' +
+   '<input class="qty" type="number" step="1" value="' + qty + '">' +
    '<button type="button" aria-label="削除">×</button>';
  row.querySelectorAll("input").forEach(x => x.addEventListener("input", update));
  row.querySelector("button").addEventListener("click", () => { row.remove(); update(); });
@@ -140,7 +143,7 @@ function addRow(rate, qty) {
 initial.forEach(x => addRow(x[0], x[1]));
 
 $("add").addEventListener("click", () => {
- addRow(Number($("price").value) || 157.670, 100000);
+ addRow(Number($("price").value) || 157.670, 10);
  update();
 });
 
@@ -152,7 +155,7 @@ function rows() {
  return [...positions.querySelectorAll(".position")].map(row => ({
    p: parseFloat(row.querySelector(".entry").value),
    q: parseFloat(row.querySelector(".qty").value)
- })).filter(x => Number.isFinite(x.p) && x.p > 0 && Number.isFinite(x.q) && x.q > 0);
+ })).filter(x => Number.isFinite(x.p) && x.p > 0 && Number.isFinite(x.q) && x.q !== 0);
 }
 
 function metrics(rate) {
@@ -163,33 +166,35 @@ function metrics(rate) {
  const days = Math.max(0, parseFloat($("days").value) || 0);
  const rs = rows();
 
- let qty = 0, pricePl = 0;
+ let qty = 0, grossQty = 0, pricePl = 0;
  for (const r of rs) {
-   qty += r.q;
-   pricePl += (rate - r.p) * r.q;
+   const units = r.q * 10000;
+   qty += units;
+   grossQty += Math.abs(units);
+   pricePl += (rate - r.p) * units;
  }
 
  const swapPl = qty / 10000 * swap * days;
  const totalPl = pricePl + swapPl;
- const notional = Math.abs(rate * qty);
+ const notional = rate * grossQty;
  const equity = dep + totalPl;
  const margin = notional / lev;
  const free = equity - margin;
  const eff = equity !== 0 ? notional / equity : Infinity;
 
- return {dep,lev,lcRate,swap,days,qty,pricePl,swapPl,totalPl,notional,equity,margin,free,eff,rs};
+ return {dep,lev,lcRate,swap,days,qty,grossQty,pricePl,swapPl,totalPl,notional,equity,margin,free,eff,rs};
 }
 
 function lossCut() {
  const current = Math.max(0.001, parseFloat($("price").value) || 157.670);
  const m = metrics(current);
- if (m.qty <= 0) return NaN;
+ if (!m.rs.length || m.grossQty <= 0) return NaN;
 
- const weighted = m.rs.reduce((s,r) => s + r.p * r.q, 0);
- const denom = m.qty * (1 - m.lcRate / m.lev);
- if (denom <= 0) return NaN;
+ const signedEntry = m.rs.reduce((sum,r) => sum + r.p * r.q, 0);
+ const denom = m.qty - (m.lcRate / m.lev) * m.grossQty;
+ if (Math.abs(denom) < 1e-12) return NaN;
 
- return (weighted - (m.dep + m.swapPl)) / denom;
+ return (signedEntry - m.dep - m.swapPl) / denom;
 }
 
 function yen(n) {
@@ -306,7 +311,12 @@ function applyState(s) {
  if (Array.isArray(s.positions) && s.positions.length) {
    s.positions.forEach(p => {
      if (p && p.price !== undefined && p.qty !== undefined) {
-       addRow(p.price, p.qty);
+       // Migrate older saved data that used raw USD quantities.
+       const savedQty = Number(p.qty);
+       const qty10k = Number.isFinite(savedQty) && Math.abs(savedQty) >= 1000
+         ? savedQty / 10000
+         : savedQty;
+       addRow(p.price, qty10k);
      }
    });
  }
