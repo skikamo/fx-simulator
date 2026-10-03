@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><meta name="theme-color" content="#0d1020">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d1020">
 <title>FX Simulator</title>
 <style>
 :root{--bg:#0d1020;--panel:#151932;--panel2:#1c2040;--border:#303654;--text:#f3f4fa;--muted:#aeb2c8;--accent:#29a8f2;--good:#38d0c8;--bad:#ef4d72}
@@ -122,294 +123,235 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 const $ = id => document.getElementById(id);
 const positions = $("positions");
 const initial = [
- [156.900,10],
- [157.700,5],
- [158.500,10],
- [158.600,10],
- [159.200,10]
+  [156.900, 10], [157.700, 5], [158.500, 10], [158.600, 10], [159.200, 10]
 ];
-
-function addRow(rate, qty) {
- const row = document.createElement("div");
- row.className = "position";
- row.innerHTML =
-   '<input class="entry" type="number" min="0.001" step="0.001" value="' + rate + '">' +
-   '<input class="qty" type="number" step="1" value="' + qty + '">' +
-   '<button type="button" aria-label="削除">×</button>';
- row.querySelectorAll("input").forEach(x => x.addEventListener("input", update));
- row.querySelector("button").addEventListener("click", () => { row.remove(); update(); });
- positions.appendChild(row);
-}
-
-initial.forEach(x => addRow(x[0], x[1]));
-
-$("add").addEventListener("click", () => {
- addRow(Number($("price").value) || 157.670, 10);
- update();
-});
-
-["deposit","price","lev","lcRate","swap","days"].forEach(id =>
- $(id).addEventListener("input", update)
-);
-
-$("fetchPrice").addEventListener("click", async () => {
- const button = $("fetchPrice");
- const oldText = button.textContent;
- button.disabled = true;
- button.textContent = "取得中...";
- try {
-   const response = await fetch("https://api.frankfurter.dev/v2/rate/usd/jpy", {
-     cache: "no-store"
-   });
-   if (!response.ok) throw new Error("HTTP " + response.status);
-   const data = await response.json();
-   const rate = Number(data.rate);
-   if (!Number.isFinite(rate) || rate <= 0) throw new Error("Invalid rate");
-   $("price").value = rate.toFixed(3);
-   update();
-   $("saveStatus").textContent = "WEB更新: " + rate.toFixed(3) + " (" + data.date + ")";
- } catch (e) {
-   $("saveStatus").textContent = "WEBからのレート取得に失敗しました。";
- } finally {
-   button.disabled = false;
-   button.textContent = oldText;
- }
-});
-
-function rows() {
- return [...positions.querySelectorAll(".position")].map(row => ({
-   p: parseFloat(row.querySelector(".entry").value),
-   q: parseFloat(row.querySelector(".qty").value)
- })).filter(x => Number.isFinite(x.p) && x.p > 0 && Number.isFinite(x.q) && x.q !== 0);
-}
-
-function metrics(rate) {
- const dep = Math.max(0, parseFloat($("deposit").value) || 0);
- const lev = Math.max(0.0001, parseFloat($("lev").value) || 10);
- const lcRate = Math.min(100, Math.max(0, parseFloat($("lcRate").value) || 30)) / 100;
- const swap = parseFloat($("swap").value) || 0;
- const days = Math.max(0, parseFloat($("days").value) || 0);
- const rs = rows();
-
- let qty = 0, grossQty = 0, pricePl = 0;
- for (const r of rs) {
-   const units = r.q * 10000;
-   qty += units;
-   grossQty += Math.abs(units);
-   pricePl += (rate - r.p) * units;
- }
-
- const swapPl = qty / 10000 * swap * days;
- const totalPl = pricePl + swapPl;
- const notional = rate * grossQty;
- const equity = dep + totalPl;
- const margin = notional / lev;
- const free = equity - margin;
- const eff = equity !== 0 ? notional / equity : Infinity;
-
- return {dep,lev,lcRate,swap,days,qty,grossQty,pricePl,swapPl,totalPl,notional,equity,margin,free,eff,rs};
-}
-
-function lossCut() {
- const current = Math.max(0.001, parseFloat($("price").value) || 157.670);
- const m = metrics(current);
- if (!m.rs.length || m.grossQty <= 0) return NaN;
-
- const signedEntry = m.rs.reduce((sum,r) => sum + r.p * r.q * 10000, 0);
- const denom = m.qty - (m.lcRate / m.lev) * m.grossQty;
- if (Math.abs(denom) < 1e-12) return NaN;
-
- return (signedEntry - m.dep - m.swapPl) / denom;
-}
-
-function yen(n) {
- return Number.isFinite(n) ? Math.round(n).toLocaleString("ja-JP") + "円" : "-";
-}
-
-function signed(n) {
- return Number.isFinite(n)
-   ? (n >= 0 ? "+" : "") + Math.round(n).toLocaleString("ja-JP") + "円"
-   : "-";
-}
-
-function drawChart() {
- const svg = $("chart");
- const W = 700, H = 280, pad = {l:58,r:18,t:18,b:38};
- svg.innerHTML = "";
-
- const cur = Math.max(0.001, parseFloat($("price").value) || 157.670);
- const lc = lossCut();
-
- let lo = Math.max(0.01, cur - 10);
- let hi = cur + 10;
-
- if (Number.isFinite(lc) && lc > lo && lc < hi) {
-   lo = Math.min(lo, lc - 1);
-   hi = Math.max(hi, lc + 1);
- }
-
- const pts = [];
- for (let i=0;i<=100;i++) {
-   const x = lo + (hi-lo)*i/100;
-   pts.push({x,y:metrics(x).totalPl});
- }
-
- let ymin = Math.min(...pts.map(p=>p.y),0);
- let ymax = Math.max(...pts.map(p=>p.y),0);
- if (ymax === ymin) { ymax += 1; ymin -= 1; }
- const range = ymax-ymin;
- ymax += range*0.08;
- ymin -= range*0.08;
-
- const sx = x => pad.l+(x-lo)/(hi-lo)*(W-pad.l-pad.r);
- const sy = y => pad.t+(ymax-y)/(ymax-ymin)*(H-pad.t-pad.b);
-
- function el(tag, attrs) {
-   const e=document.createElementNS("http://www.w3.org/2000/svg",tag);
-   for(const k in attrs)e.setAttribute(k,attrs[k]);
-   svg.appendChild(e);
-   return e;
- }
-
- for(let i=0;i<5;i++){
-   const y=ymin+(ymax-ymin)*i/4;
-   el("line",{x1:pad.l,x2:W-pad.r,y1:sy(y),y2:sy(y),class:"gridline"});
-   const t=el("text",{x:pad.l-8,y:sy(y)+4,"text-anchor":"end"});
-   t.textContent=Math.round(y/1000)+"k";
- }
-
- el("line",{x1:pad.l,x2:W-pad.r,y1:sy(0),y2:sy(0),class:"zero"});
-
- const path=pts.map((p,i)=>(i?"L":"M")+sx(p.x).toFixed(1)+" "+sy(p.y).toFixed(1)).join(" ");
- el("path",{d:path,class:"line"});
-
- if(Number.isFinite(lc) && lc>=lo && lc<=hi){
-   el("line",{x1:sx(lc),x2:sx(lc),y1:pad.t,y2:H-pad.b,class:"lc"});
-   const t=el("text",{x:sx(lc)+5,y:pad.t+13});
-   t.textContent="LC "+lc.toFixed(3);
- }
-
- const m=metrics(cur);
- el("line",{x1:sx(cur),x2:sx(cur),y1:pad.t,y2:H-pad.b,class:"current"});
- el("circle",{cx:sx(cur),cy:sy(m.totalPl),r:5,class:"dot"});
-
- const t=el("text",{x:sx(cur),y:H-10,"text-anchor":"middle"});
- t.textContent=cur.toFixed(3);
-}
-
 const STORAGE_KEY = "fx-simulator-v2";
 
-function collectState() {
- return {
-   deposit: $("deposit").value,
-   price: $("price").value,
-   lev: $("lev").value,
-   lcRate: $("lcRate").value,
-   swap: $("swap").value,
-   days: $("days").value,
-   positions: [...positions.querySelectorAll(".position")].map(row => ({
-     price: row.querySelector(".entry").value,
-     qty: row.querySelector(".qty").value
-   }))
- };
-}
+const addRow = (rate, qty) => {
+  const row = document.createElement("div");
+  row.className = "position";
+  row.innerHTML = `<input class="entry" type="number" min="0.001" step="0.001" value="${rate}"><input class="qty" type="number" step="1" value="${qty}"><button type="button" aria-label="削除">×</button>`;
+  row.querySelectorAll("input").forEach(x => x.addEventListener("input", update));
+  row.querySelector("button").addEventListener("click", () => { row.remove(); update(); });
+  positions.appendChild(row);
+};
 
-function saveLocal() {
- try {
-   localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
-   $("saveStatus").textContent = "自動保存済み";
- } catch(e) {
-   $("saveStatus").textContent = "自動保存を利用できません。";
- }
-}
+const rows = () => [...positions.querySelectorAll(".position")].map(row => ({
+  p: parseFloat(row.querySelector(".entry").value),
+  q: parseFloat(row.querySelector(".qty").value)
+})).filter(x => Number.isFinite(x.p) && x.p > 0 && Number.isFinite(x.q) && x.q !== 0);
 
-function applyState(s) {
- if (!s || typeof s !== "object") return false;
+const metrics = rate => {
+  const dep = Math.max(0, parseFloat($("deposit").value) || 0);
+  const lev = Math.max(0.0001, parseFloat($("lev").value) || 10);
+  const lcRate = Math.min(100, Math.max(0, parseFloat($("lcRate").value) || 30)) / 100;
+  const swap = parseFloat($("swap").value) || 0;
+  const days = Math.max(0, parseFloat($("days").value) || 0);
+  const rs = rows();
 
- ["deposit","price","lev","lcRate","swap","days"].forEach(id => {
-   if (s[id] !== undefined && s[id] !== null) {
-     $(id).value = s[id];
-   }
- });
+  let qty = 0, grossQty = 0, pricePl = 0;
+  for (const r of rs) {
+    const units = r.q * 10000;
+    qty += units;
+    grossQty += Math.abs(units);
+    pricePl += (rate - r.p) * units;
+  }
 
- positions.innerHTML = "";
- if (Array.isArray(s.positions) && s.positions.length) {
-   s.positions.forEach(p => {
-     if (p && p.price !== undefined && p.qty !== undefined) {
-       // Migrate older saved data that used raw USD quantities.
-       const savedQty = Number(p.qty);
-       const qty10k = Number.isFinite(savedQty) && Math.abs(savedQty) >= 1000
-         ? savedQty / 10000
-         : savedQty;
-       addRow(p.price, qty10k);
-     }
-   });
- }
+  const swapPl = qty / 10000 * swap * days;
+  const totalPl = pricePl + swapPl;
+  const notional = rate * grossQty;
+  const equity = dep + totalPl;
+  const margin = notional / lev;
+  const free = equity - margin;
+  const eff = equity !== 0 ? notional / equity : Infinity;
 
- if (!positions.children.length) {
-   initial.forEach(x => addRow(x[0], x[1]));
- }
- return true;
-}
+  return { dep, lev, lcRate, swap, days, qty, grossQty, pricePl, swapPl, totalPl, notional, equity, margin, free, eff, rs };
+};
 
-function loadLocal() {
- try {
-   const raw = localStorage.getItem(STORAGE_KEY);
-   if (!raw) return false;
-   return applyState(JSON.parse(raw));
- } catch(e) {
-   console.error("Failed to load local settings:", e);
-   return false;
- }
-}
+const lossCut = () => {
+  const current = Math.max(0.001, parseFloat($("price").value) || 157.670);
+  const m = metrics(current);
+  if (!m.rs.length || m.grossQty <= 0) return NaN;
 
-function update() {
- const rate=Math.max(0.001,parseFloat($("price").value)||157.670);
- const m=metrics(rate);
- const lc=lossCut();
+  const signedEntry = m.rs.reduce((sum, r) => sum + r.p * r.q * 10000, 0);
+  const denom = m.qty - (m.lcRate / m.lev) * m.grossQty;
+  return Math.abs(denom) < 1e-12 ? NaN : (signedEntry - m.dep - m.swapPl) / denom;
+};
 
- $("pl").textContent=signed(m.totalPl);
- $("pl").className="value "+(m.totalPl<0?"bad":"good");
+const formatCurrency = (n, isSigned = false) => {
+  if (!Number.isFinite(n)) return "-";
+  const formatted = Math.round(n).toLocaleString("ja-JP") + "円";
+  return isSigned ? (n >= 0 ? "+" : "") + formatted : formatted;
+};
 
- $("pricePl").textContent=signed(m.pricePl);
- $("pricePl").className="value "+(m.pricePl<0?"bad":"good");
+const updateValueAndClass = (elId, val, isSigned = false) => {
+  const el = $(elId);
+  el.textContent = formatCurrency(val, isSigned);
+  el.className = `value ${val < 0 ? "bad" : "good"} ${el.className.includes("small") ? "small" : ""}`;
+};
 
- $("swapPl").textContent=signed(m.swapPl);
- $("swapPl").className="value "+(m.swapPl<0?"bad":"good");
+const drawChart = () => {
+  const svg = $("chart");
+  const W = 700, H = 280, pad = { l: 58, r: 18, t: 18, b: 38 };
+  svg.innerHTML = "";
 
- $("equity").textContent=yen(m.equity);
- $("margin").textContent=yen(m.margin);
- $("free").textContent=yen(m.free);
- $("efflev").textContent=Number.isFinite(m.eff)?m.eff.toFixed(2)+"x":"-";
- $("notional").textContent=yen(m.notional);
- $("lc").textContent=Number.isFinite(lc)?lc.toFixed(3):"-";
+  const cur = Math.max(0.001, parseFloat($("price").value) || 157.670);
+  const lc = lossCut();
+  let lo = Math.max(0.01, cur - 10), hi = cur + 10;
 
- const ratio=m.margin>0?m.equity/m.margin:Infinity;
- if(m.equity<=0){
-   $("status").innerHTML='<span class="bad">実質保証金が0円以下です。</span>';
- }else if(ratio<=m.lcRate){
-   $("status").innerHTML='<span class="bad">ロスカット水準に達しています。保証金維持率 '+(ratio*100).toFixed(1)+'%</span>';
- }else{
-   $("status").textContent="保証金維持率 "+(ratio*100).toFixed(1)+"% / ロスカット基準 "+(m.lcRate*100).toFixed(0)+"%";
- }
+  if (Number.isFinite(lc) && lc > lo && lc < hi) {
+    lo = Math.min(lo, lc - 1);
+    hi = Math.max(hi, lc + 1);
+  }
 
- const deltas=[-10,-5,0,5,10];
- $("scenario").innerHTML=deltas.map(d=>{
-   const r=Math.max(0.001,rate+d);
-   const x=metrics(r).totalPl;
-   return '<div class="cell"><div class="rate">'+r.toFixed(3)+'</div><div class="pl '+(x<0?"bad":"good")+'">'+signed(x)+'</div></div>';
- }).join("");
+  const pts = Array.from({ length: 101 }, (_, i) => {
+    const x = lo + (hi - lo) * i / 100;
+    return { x, y: metrics(x).totalPl };
+  });
 
- drawChart();
- saveLocal();
-}
+  let ymin = Math.min(...pts.map(p => p.y), 0);
+  let ymax = Math.max(...pts.map(p => p.y), 0);
+  if (ymax === ymin) { ymax += 1; ymin -= 1; }
+  const range = ymax - ymin;
+  ymax += range * 0.08;
+  ymin -= range * 0.08;
 
+  const sx = x => pad.l + (x - lo) / (hi - lo) * (W - pad.l - pad.r);
+  const sy = y => pad.t + (ymax - y) / (ymax - ymin) * (H - pad.t - pad.b);
+  const el = (tag, attrs) => {
+    const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
+    return e;
+  };
+
+  for (let i = 0; i < 5; i++) {
+    const y = ymin + (ymax - ymin) * i / 4;
+    el("line", { x1: pad.l, x2: W - pad.r, y1: sy(y), y2: sy(y), class: "gridline" });
+    const t = el("text", { x: pad.l - 8, y: sy(y) + 4, "text-anchor": "end" });
+    t.textContent = Math.round(y / 1000) + "k";
+  }
+
+  el("line", { x1: pad.l, x2: W - pad.r, y1: sy(0), y2: sy(0), class: "zero" });
+  el("path", { d: pts.map((p, i) => (i ? "L" : "M") + sx(p.x).toFixed(1) + " " + sy(p.y).toFixed(1)).join(" "), class: "line" });
+
+  if (Number.isFinite(lc) && lc >= lo && lc <= hi) {
+    el("line", { x1: sx(lc), x2: sx(lc), y1: pad.t, y2: H - pad.b, class: "lc" });
+    const t = el("text", { x: sx(lc) + 5, y: pad.t + 13 });
+    t.textContent = "LC " + lc.toFixed(3);
+  }
+
+  const m = metrics(cur);
+  el("line", { x1: sx(cur), x2: sx(cur), y1: pad.t, y2: H - pad.b, class: "current" });
+  el("circle", { cx: sx(cur), cy: sy(m.totalPl), r: 5, class: "dot" });
+  const t = el("text", { x: sx(cur), y: H - 10, "text-anchor": "middle" });
+  t.textContent = cur.toFixed(3);
+};
+
+const saveLocal = () => {
+  try {
+    const state = {
+      deposit: $("deposit").value,
+      price: $("price").value,
+      lev: $("lev").value,
+      lcRate: $("lcRate").value,
+      swap: $("swap").value,
+    days: $("days").value,
+      positions: rows().map(r => ({ price: r.p, qty: r.q }))
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    $("saveStatus").textContent = "自動保存済み";
+  } catch (e) {
+    $("saveStatus").textContent = "自動保存を利用できません。";
+  }
+};
+
+const loadLocal = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    
+    ["deposit", "price", "lev", "lcRate", "swap", "days"].forEach(id => {
+      if (s[id] != null) $(id).value = s[id];
+    });
+
+    positions.innerHTML = "";
+    const posList = Array.isArray(s.positions) && s.positions.length ? s.positions : initial.map(x => ({ price: x[0], qty: x[1] }));
+    posList.forEach(p => {
+      const q = Number(p.qty);
+      addRow(p.price, Number.isFinite(q) && Math.abs(q) >= 1000 ? q / 10000 : q);
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+const update = () => {
+  const rate = Math.max(0.001, parseFloat($("price").value) || 157.670);
+  const m = metrics(rate);
+  const lc = lossCut();
+
+  updateValueAndClass("pl", m.totalPl, true);
+  updateValueAndClass("pricePl", m.pricePl, true);
+  updateValueAndClass("swapPl", m.swapPl, true);
+
+  $("equity").textContent = formatCurrency(m.equity);
+  $("margin").textContent = formatCurrency(m.margin);
+  $("free").textContent = formatCurrency(m.free);
+  $("efflev").textContent = Number.isFinite(m.eff) ? m.eff.toFixed(2) + "x" : "-";
+  $("notional").textContent = formatCurrency(m.notional);
+  $("lc").textContent = Number.isFinite(lc) ? lc.toFixed(3) : "-";
+
+  const ratio = m.margin > 0 ? m.equity / m.margin : Infinity;
+  if (m.equity <= 0) {
+    $("status").innerHTML = '<span class="bad">実質保証金が0円以下です。</span>';
+  } else if (ratio <= m.lcRate) {
+    $("status").innerHTML = `<span class="bad">ロスカット水準に達しています。保証金維持率 ${(ratio * 100).toFixed(1)}%</span>`;
+  } else {
+    $("status").textContent = `保証金維持率 ${(ratio * 100).toFixed(1)}% / ロスカット基準 ${(m.lcRate * 100).toFixed(0)}%`;
+  }
+
+  $("scenario").innerHTML = [-10, -5, 0, 5, 10].map(d => {
+    const r = Math.max(0.001, rate + d);
+    const x = metrics(r).totalPl;
+    return `<div class="cell"><div class="rate">${r.toFixed(3)}</div><div class="pl ${x < 0 ? "bad" : "good"}">${formatCurrency(x, true)}</div></div>`;
+  }).join("");
+
+  drawChart();
+  saveLocal();
+};
+
+// Event Listeners
+$("add").addEventListener("click", () => { addRow(Number($("price").value) || 157.670, 10); update(); });
+["deposit", "price", "lev", "lcRate", "swap", "days"].forEach(id => $(id).addEventListener("input", update));
+
+$("fetchPrice").addEventListener("click", async () => {
+  const btn = $("fetchPrice"), oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "取得中...";
+  try {
+    const res = await fetch("https://api.frankfurter.dev/v2/rate/usd/jpy", { cache: "no-store" });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const rate = Number(data.rate);
+    if (!Number.isFinite(rate) || rate <= 0) throw new Error();
+    $("price").value = rate.toFixed(3);
+    update();
+    $("saveStatus").textContent = `WEB更新: ${rate.toFixed(3)} (${data.date})`;
+  } catch (e) {
+    $("saveStatus").textContent = "WEBからのレート取得に失敗しました。";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+});
 
 const loaded = loadLocal();
+if (!positions.children.length) initial.forEach(x => addRow(x[0], x[1]));
 update();
-$("saveStatus").textContent = loaded
-  ? "前回の設定を自動読み込みしました。"
-  : "初期設定を使用しています。";
+$("saveStatus").textContent = loaded ? "前回の設定を自動読み込みしました。" : "初期設定を使用しています。";
 })();
 </script>
 </body>
