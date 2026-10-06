@@ -47,7 +47,7 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 .margin100{stroke:#f0a34a;stroke-width:2;stroke-dasharray:3 4}
 .current{stroke:var(--muted)}.dot{fill:var(--accent);stroke:var(--bg);stroke-width:2}
 .current{stroke:#ffffff;}
-.scenario{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}
+/* .scenario{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px} */
 .cell{background:var(--panel2);border-radius:8px;padding:8px;text-align:center}
 .cell .rate{font-size:12px;color:var(--muted)}.cell .pl{font-size:13px;font-weight:700;margin-top:4px}
 @media(max-width:600px){
@@ -67,28 +67,11 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <!-- <section class="section">
 <h2>ドル/円と総合評価損益の関係</h2> -->
 <div class="chartbox"><svg id="chart" viewBox="0 0 700 280" aria-label="ドル円と総合評価損益"></svg></div>
-<div id="scenario" class="scenario"></div>
+<!-- <div id="scenario" class="scenario"></div> -->
 <!-- </section> -->
 
-<section class="section">
-<div class="grid settings-grid">
-<div><label>預託保証金 (JPY)</label><input id="deposit" type="number" min="0" step="1" value="10312857"></div>
-<div><label>現在のドル/円</label><div class="price-control"><input id="price" type="number" min="0.001" step="0.001" value="157.670"><button id="fetchPrice" type="button">WEBから更新</button></div></div>
-<div><label>レバレッジコース</label><input id="lev" type="number" min="0.01" step="1" value="10"></div>
-<div><label>ロスカット率 (%)</label><input id="lcRate" type="number" min="0" max="100" step="1" value="30"></div>
-<div><label>平均スワップポイント (円 / 1万通貨 / 日)</label><input id="swap" type="number" step="0.1" value="20"></div>
-<div><label>平均経過日数 (日)</label><input id="days" type="number" min="0" step="1" value="30"></div>
-</div>
-</section>
 
-<section class="section">
-<div class="toolbar"><h2>建玉一覧 <span style="font-size:11px;color:var(--muted);font-weight:400">(+買い / -売り)</span></h2><button id="add" type="button">+ 建玉を追加</button></div>
-<div class="positions-head"><span>建玉単価</span><span>数量 (万通貨) +買い / -売り</span><span></span></div>
-<div id="positions"></div>
-<div class="note">数量は + が買い、- が売りです。平均スワップポイントと平均経過日数は全建玉に適用します。</div>
-</section>
-
-<section class="section">
+<!-- <section class="section"> -->
 <div class="results">
 <div class="result"><div class="key">総合評価損益</div><div id="pl" class="value">-</div></div>
 
@@ -119,7 +102,28 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <div class="result small"><div class="key">ロスカット ドル/円</div><div id="lc" class="value bad">-</div></div>
 </div>
 <div id="status" class="status"></div>
+<!-- </section> -->
+
+<p></p>
+
+<section class="section">
+<div class="grid settings-grid">
+<div><label>預託保証金 (JPY)</label><input id="deposit" type="number" min="0" step="1" value="10312857"></div>
+<div><label>現在のドル/円</label><div class="price-control"><input id="price" type="number" min="0.001" step="0.001" value="157.670"><button id="fetchPrice" type="button">WEBから更新</button></div></div>
+<div><label>レバレッジコース</label><input id="lev" type="number" min="0.01" step="1" value="10"></div>
+<div><label>ロスカット率 (%)</label><input id="lcRate" type="number" min="0" max="100" step="1" value="30"></div>
+<div><label>平均スワップポイント (円 / 1万通貨 / 日)</label><input id="swap" type="number" step="0.1" value="20"></div>
+<div><label>平均経過日数 (日)</label><input id="days" type="number" min="0" step="1" value="30"></div>
+</div>
 </section>
+
+<section class="section">
+<div class="toolbar"><h2>建玉一覧 <span style="font-size:11px;color:var(--muted);font-weight:400">(+買い / -売り)</span></h2><button id="add" type="button">+ 建玉を追加</button></div>
+<div class="positions-head"><span>建玉単価</span><span>数量 (万通貨) +買い / -売り</span><span></span></div>
+<div id="positions"></div>
+<div class="note">数量は + が買い、- が売りです。平均スワップポイントと平均経過日数は全建玉に適用します。</div>
+</section>
+
 
 
 
@@ -400,11 +404,11 @@ const update = () => {
     $("status").textContent = `保証金維持率 ${(ratio * 100).toFixed(1)}% / ロスカット基準 ${(m.lcRate * 100).toFixed(0)}%`;
   }
 
-  $("scenario").innerHTML = [-10, -5, 0, 5, 10].map(d => {
-    const r = Math.max(0.001, rate + d);
-    const x = metrics(r).totalPl;
-    return `<div class="cell"><div class="rate">${r.toFixed(3)}</div><div class="pl ${x < 0 ? "bad" : "good"}">${formatCurrency(x, true)}</div></div>`;
-  }).join("");
+  // $("scenario").innerHTML = [-10, -5, 0, 5, 10].map(d => {
+  //   const r = Math.max(0.001, rate + d);
+  //   const x = metrics(r).totalPl;
+  //   return `<div class="cell"><div class="rate">${r.toFixed(3)}</div><div class="pl ${x < 0 ? "bad" : "good"}">${formatCurrency(x, true)}</div></div>`;
+  // }).join("");
 
   drawChart();
   saveLocal();
