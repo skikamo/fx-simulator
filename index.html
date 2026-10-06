@@ -44,7 +44,9 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 .gridline{stroke:var(--border)}.zero{stroke:var(--muted);stroke-dasharray:4 4}
 .line{fill:none;stroke:var(--accent);stroke-width:3}
 .lc{stroke:var(--bad);stroke-width:2;stroke-dasharray:5 4}
+.margin100{stroke:#f0a34a;stroke-width:2;stroke-dasharray:3 4}
 .current{stroke:var(--muted)}.dot{fill:var(--accent);stroke:var(--bg);stroke-width:2}
+.current{stroke:#ffffff;}
 .scenario{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}
 .cell{background:var(--panel2);border-radius:8px;padding:8px;text-align:center}
 .cell .rate{font-size:12px;color:var(--muted)}.cell .pl{font-size:13px;font-weight:700;margin-top:4px}
@@ -61,6 +63,12 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <h1 style="margin:0">FX Simulator</h1>
 <div id="saveStatus" style="font-size:11px;color:var(--muted);text-align:right;line-height:1.3;max-width:240px">設定はこのiPhoneのブラウザに自動保存されます。</div>
 </div>
+
+<!-- <section class="section">
+<h2>ドル/円と総合評価損益の関係</h2> -->
+<div class="chartbox"><svg id="chart" viewBox="0 0 700 280" aria-label="ドル円と総合評価損益"></svg></div>
+<div id="scenario" class="scenario"></div>
+<!-- </section> -->
 
 <section class="section">
 <div class="grid settings-grid">
@@ -113,11 +121,7 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <div id="status" class="status"></div>
 </section>
 
-<section class="section">
-<h2>ドル/円と総合評価損益の関係</h2>
-<div class="chartbox"><svg id="chart" viewBox="0 0 700 280" aria-label="ドル円と総合評価損益"></svg></div>
-<div id="scenario" class="scenario"></div>
-</section>
+
 
 <section class="section">
 <div class="note">
@@ -198,6 +202,20 @@ const zeroPlRate = () => {
   return (signedEntry - m.swapPl) / m.qty;
 };
 
+const margin100Rate = () => {
+  const current = Math.max(0.001, parseFloat($("price").value) || 157.670);
+  const m = metrics(current);
+  if (!m.rs.length || Math.abs(m.qty) < 1e-12 || m.lev <= 0) return NaN;
+  const signedEntry = m.rs.reduce((sum, r) => sum + r.p * r.q * 10000, 0);
+  // 保証金維持率100% = 実質保証金 / 必要保証金 = 1
+  // 実質保証金 = 預託保証金 + 総合評価損益
+  // 必要保証金 = rate × 総建玉数量(絶対値) / レバレッジ
+  const denom = m.qty - m.grossQty / m.lev;
+  return Math.abs(denom) < 1e-12
+    ? NaN
+    : (signedEntry - m.dep - m.swapPl) / denom;
+};
+
 const lossCut = () => {
   const current = Math.max(0.001, parseFloat($("price").value) || 157.670);
   const m = metrics(current);
@@ -228,15 +246,21 @@ const drawChart = () => {
   const cur = Math.max(0.001, parseFloat($("price").value) || 157.670);
   const lc = lossCut();
   const zero = zeroPlRate();
-  let lo = Math.max(0.01, cur - 10), hi = cur + 10;
+  const margin100 = margin100Rate();
 
-  if (Number.isFinite(lc) && lc > lo && lc < hi) {
-    lo = Math.min(lo, lc - 1);
-    hi = Math.max(hi, lc + 1);
-  }
-  if (Number.isFinite(zero) && zero > lo && zero < hi) {
-    lo = Math.min(lo, zero - 1);
-    hi = Math.max(hi, zero + 1);
+  // 3つの基準点（損益0・保証金維持率100%・LC）と現在レートを含む範囲にする
+  const markers = [cur, zero, margin100, lc].filter(Number.isFinite);
+  let lo = Math.max(0.01, Math.min(...markers));
+  let hi = Math.max(...markers);
+  const span = Math.max(hi - lo, 0.1);
+  const margin = Math.max(span * 0.12, 0.5);
+  lo = Math.max(0.01, lo - margin);
+  hi += margin;
+
+  if (hi - lo < 2) {
+    const center = (hi + lo) / 2;
+    lo = Math.max(0.01, center - 1);
+    hi = center + 1;
   }
 
   const pts = Array.from({ length: 101 }, (_, i) => {
@@ -274,6 +298,13 @@ const drawChart = () => {
     el("circle", { cx: sx(zero), cy: sy(0), r: 5, class: "dot" });
     const zt = el("text", { x: sx(zero), y: pad.t + 13, "text-anchor": "middle" });
     zt.textContent = "損益0 " + zero.toFixed(3);
+  }
+
+  if (Number.isFinite(margin100) && margin100 >= lo && margin100 <= hi) {
+    const m100X = sx(margin100);
+    el("line", { x1: m100X, x2: m100X, y1: pad.t, y2: H - pad.b, class: "margin100" });
+    const m100t = el("text", { x: m100X + 5, y: pad.t + 29 });
+    m100t.textContent = "保証金100% " + margin100.toFixed(3);
   }
 
   el("path", { d: pts.map((p, i) => (i ? "L" : "M") + sx(p.x).toFixed(1) + " " + sy(p.y).toFixed(1)).join(" "), class: "line" });
