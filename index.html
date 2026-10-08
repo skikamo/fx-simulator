@@ -64,58 +64,33 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <div id="saveStatus" style="font-size:11px;color:var(--muted);text-align:right;line-height:1.3;max-width:240px">設定はこのiPhoneのブラウザに自動保存されます。</div>
 </div>
 
-<!-- <section class="section">
-<h2>ドル/円と総合評価損益の関係</h2> -->
 <div class="chartbox"><svg id="chart" viewBox="0 0 700 280" aria-label="ドル円と総合評価損益"></svg></div>
-<!-- <div id="scenario" class="scenario"></div> -->
-<!-- </section> -->
 
-
-<!-- <section class="section"> -->
 <div class="results" style="margin: 5px;">
 <div class="result"><div class="key">総合評価損益</div><div id="pl" class="value">-</div></div>
-
 <div class="result"><div class="key">実質保証金</div><div id="equity" class="value">-</div></div>
-<!-- <div class="result small"><div class="key">価格変動損益</div><div id="pricePl" class="value">-</div></div>
-<div class="result small"><div class="key">スワップ損益</div><div id="swapPl" class="value">-</div></div> -->
 
-<div class="result small">
-  <div class="key">価格変動損益 / スワップ損益</div>
-  <div class="result-combined">
+<div class="result small"><div class="key">価格変動損益 / スワップ損益</div><div class="result-combined">
     <div id="pricePl" class="main-value">-</div>/
     <div id="swapPl" class="sub-value" style="min-width: 70px;">-</div>
-  </div>
-</div>
+  </div></div>
 
-
-
-<div class="result small">
-  <div class="key">必要保証金 / 保証金維持率</div>
-  <div class="result-combined">
+<div class="result small"><div class="key">必要保証金 / 保証金維持率</div><div class="result-combined">
     <div id="margin" class="main-value">-</div>/
     <div id="status" class="sub-value">-</div>
-  </div>
-</div>
+  </div></div>
 
 <div class="result small"><div class="key">建玉余力 / 注文可能数量</div><div class="result-combined"><div id="free" class="main-value">-</div>/<div id="orderQty" class="sub-value">-</div></div></div>
 
-
-<!-- <div class="result small"><div class="key">建玉金額</div><div id="notional" class="value">-</div></div> -->
-
-
-<div class="result small">
-  <div class="key">建玉金額 / 実効レバレッジ</div>
-  <div class="result-combined">
+<div class="result small"><div class="key">建玉金額 / 実効レバレッジ</div><div class="result-combined">
     <div id="notional" class="main-value">-</div>/
     <div id="efflev" class="sub-value">-</div>
-  </div>
-</div>
+  </div></div>
 
 
 <div class="result small"><div class="key">ロスカット ドル/円</div><div id="lc" class="value bad">-</div></div>
 </div>
-<div id="status" class="status"></div>
-<!-- </section> -->
+<!-- <div id="status" class="status"></div> -->
 
 <p></p>
 
@@ -136,9 +111,6 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 <div id="positions"></div>
 <div class="note">数量は + が買い、- が売りです。平均スワップポイントと平均経過日数は全建玉に適用します。</div>
 </section>
-
-
-
 
 <section class="section">
 <div class="note">
@@ -416,13 +388,6 @@ const update = () => {
   } else {
     $("status").textContent = `${(ratio * 100).toFixed(1)}%`;
   }
-
-  // $("scenario").innerHTML = [-10, -5, 0, 5, 10].map(d => {
-  //   const r = Math.max(0.001, rate + d);
-  //   const x = metrics(r).totalPl;
-  //   return `<div class="cell"><div class="rate">${r.toFixed(3)}</div><div class="pl ${x < 0 ? "bad" : "good"}">${formatCurrency(x, true)}</div></div>`;
-  // }).join("");
-
   drawChart();
   saveLocal();
 };
@@ -436,17 +401,36 @@ $("fetchPrice").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "取得中...";
   try {
-    const res = await fetch("https://api.frankfurter.dev/v2/rate/usd/jpy", { cache: "no-store" });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const rate = Number(data.rate);
-    if (!Number.isFinite(rate) || rate <= 0) throw new Error();
+  //   const res = await fetch("https://api.frankfurter.dev/v2/rate/usd/jpy", { cache: "no-store" });
+  //   if (!res.ok) throw new Error();
+  //   const data = await res.json();
+  //   const rate = Number(data.rate);
+  //   if (!Number.isFinite(rate) || rate <= 0) throw new Error();
+  //   $("price").value = rate.toFixed(3);
+  //   update();
+  //   $("saveStatus").textContent = `WEB更新: ${rate.toFixed(3)} (${data.date})`;
+  // } catch (e) {
+  //   $("saveStatus").textContent = "WEBからのレート取得に失敗しました。";
+
+    const TWELVE_DATA_API_KEY = "b8d0bfff687e4e57a16d12a435ef6298";
+    const url = "https://api.twelvedata.com/price?symbol=USD/JPY&dp=3&apikey=" + encodeURIComponent(TWELVE_DATA_API_KEY);
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok || data.status === "error" || !data.price) {throw new Error(data.message || "為替レートを取得できませんでした。");}
+    const rate = Number(data.price);
+    if (!Number.isFinite(rate) || rate <= 0) {throw new Error("取得した為替レートが不正です。");}
     $("price").value = rate.toFixed(3);
     update();
-    $("saveStatus").textContent = `WEB更新: ${rate.toFixed(3)} (${data.date})`;
+    const now = new Date();
+    const time = now.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    $("saveStatus").innerHTML = "WEB更新: " + rate.toFixed(3) + " (" + time + ")";
   } catch (e) {
-    $("saveStatus").textContent = "WEBからのレート取得に失敗しました。";
-  } finally {
+    console.error("Twelve Data error:", e);
+    $("saveStatus").innerHTML = '<span class="bad">' + "為替レート取得エラー: " + escapeHtml(e.message) + "</span>";
+
+
+
+} finally {
     btn.disabled = false;
     btn.textContent = oldText;
   }
