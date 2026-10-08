@@ -66,6 +66,9 @@ input {
   font-size: 15px;
   transition: all 0.2s ease;
 }
+input[type="number"] {
+  padding: 8px 12px;
+}
 input:focus {
   outline: none;
   border-color: var(--accent);
@@ -128,7 +131,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
   </div>
 
   <div id="saveStatus"
-       class="ml-auto text-xs text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800/80 flex items-center gap-2 shrink-0">
+       class="ml-auto text-xs text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800/80 flex items-center gap-1 shrink-0">
     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
     設定は自動保存されます
   </div>
@@ -137,7 +140,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
   <!-- Interactive Chart Box -->
   <!-- <div class="glass-card rounded-2xl p-4 overflow-hidden relative">
     <div class="flex justify-between items-center mb-3">
-      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center ga">
         <i data-lucide="line-chart" class="w-4 h-4 text-sky-400"></i>
         レート変動 vs 総合評価損益 シミュレーション
       </div>
@@ -156,24 +159,24 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
     <!-- Card 1: 総合評価損益 -->
     <div class="glass-card-primary rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group">
       <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl group-hover:bg-sky-500/20 transition-all"></div>
-      <div class="flex justify-between items-center z-10 mb-2">
-        <span class="text-xs font-semibold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-sky-300 uppercase tracking-wider flex items-center ga">
           <i data-lucide="wallet" class="w-4 h-4 text-sky-400"></i>
           総合評価損益 (Total P/L)
         </span>
         <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-medium">リアルタイム合算</span>
       </div>
-      <div class="z-10 my-1">
+
         <div id="pl" class="metric-value text-3xl sm:text-4xl font-black tracking-tight">-</div>
-      </div>
-      <div class="z-10 grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-700/50 text-xs">
-        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-800/50">
+
+      <div class="z-10 grid grid-cols-2 gap-1 mt-1 pt-1 border-t border-slate-700/50 text-xs">
+        <div class="bg-slate-900/40 p-1 rounded-xl border border-slate-800/50">
           <div class="text-[10px] text-slate-400 flex items-center gap-1 mb-0.5">
             <i data-lucide="activity" class="w-3 h-3 text-sky-400"></i>価格変動損益
           </div>
           <div id="pricePl" class="font-bold text-sm">-</div>
         </div>
-        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-800/50">
+        <div class="bg-slate-900/40 p-1 rounded-xl border border-slate-800/50">
           <div class="text-[10px] text-slate-400 flex items-center gap-1 mb-0.5">
             <i data-lucide="coins" class="w-3 h-3 text-amber-400"></i>スワップ損益
           </div>
@@ -185,7 +188,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
     <!-- Card 2: 実質保証金 & 口座バランス -->
     <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
       <div class="flex justify-between items-center mb-2">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center ga">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
           実質保証金 (Equity)
         </span>
@@ -194,7 +197,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
       <div class="my-1">
         <div id="equity" class="metric-value text-3xl sm:text-4xl font-black text-slate-100 tracking-tight">-</div>
       </div>
-      <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-xs">
+      <div class="grid grid-cols-2 gap-1 mt-3 pt-3 border-t border-slate-800/80 text-xs">
         <div>
           <div class="text-[10px] text-slate-400">建玉金額 (Notional)</div>
           <div id="notional" class="font-bold text-sm text-slate-200 mt-0.5">-</div>
@@ -208,23 +211,23 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
 
     <!-- Card 3: 保証金維持率 & 必要保証金 -->
     <div class="glass-card rounded-2xl p-4 flex flex-col justify-between md:col-span-2">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+      <div class="flex sm:flex-row justify-between items-start sm:items-center gap-1 mb-3">
+        <div class="flex items-center gap-1">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center ga">
             <i data-lucide="gauge" class="w-4 h-4 text-indigo-400"></i>
-            保証金維持率 (Margin Level) & 必要保証金
+            保証金維持率 (Margin Level)
           </span>
         </div>
-        <div id="status" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 flex items-center gap-1.5">
+        <div id="status" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 flex items-center ga">
           -
         </div>
       </div>
 
       <!-- Visual Progress Bar for Margin Level -->
-      <div class="space-y-1.5 mb-3">
+      <div class="space-y-1 mb-3">
         <div class="flex justify-between text-[11px] text-slate-400">
-          <span class="text-rose-400">ロスカットライン</span>
-          <span>警告 (100%前後)</span>
+          <span>ロスカットライン</span>
+          <span>警告 (100%)</span>
           <span>安全圏 (300%以上)</span>
         </div>
         <div class="w-full h-3.5 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-800 relative shadow-inner">
@@ -233,19 +236,19 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80 text-xs">
-        <div class="bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/60">
+        <div class="bg-slate-900/30  rounded-xl border border-slate-800/60">
           <div class="text-[10px] text-slate-400 mb-0.5">必要保証金</div>
           <div id="margin" class="font-bold text-sm text-slate-200">-</div>
         </div>
-        <div class="bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/60">
+        <div class="bg-slate-900/30  rounded-xl border border-slate-800/60">
           <div class="text-[10px] text-slate-400 mb-0.5">建玉余力 (Free Margin)</div>
           <div id="free" class="font-bold text-sm text-slate-200">-</div>
         </div>
-        <div class="bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/60">
+        <div class="bg-slate-900/30  rounded-xl border border-slate-800/60">
           <div class="text-[10px] text-slate-400 mb-0.5">追加注文可能数量</div>
           <div id="orderQty" class="font-bold text-sm text-sky-400">-</div>
         </div>
-        <div class="bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/60 relative overflow-hidden">
+        <div class="bg-slate-900/30  rounded-xl border border-slate-800/60 relative overflow-hidden">
           <div class="absolute -right-3 -bottom-3 opacity-10"><i data-lucide="alert-triangle" class="w-12 h-12 text-rose-500"></i></div>
           <div class="text-[10px] text-rose-400 font-semibold mb-0.5">ロスカットレート</div>
           <div id="lc" class="font-black text-sm text-rose-400">-</div>
@@ -257,18 +260,18 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
 
   <!-- Settings Section -->
   <section class="glass-card rounded-2xl p-4">
-    <div class="flex items-center gap-2 mb-4 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+    <div class="flex items-center gap-1 mb-2 text-xs font-semibold text-slate-300 uppercase tracking-wider">
       <i data-lucide="sliders" class="w-4 h-4 text-sky-400"></i>
       口座・市場パラメーター設定
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-1">
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">預託保証金 (JPY)</label>
+        <label class="block text-xs font-medium text-slate-400 ">預託保証金 (JPY)</label>
         <input id="deposit" type="number" min="0" step="1" value="10312857">
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">現在のドル/円</label>
-        <div class="flex gap-2">
+        <label class="block text-xs font-medium text-slate-400 ">現在のドル/円</label>
+        <div class="flex gap-1">
           <input id="price" type="number" min="0.001" step="0.001" value="157.670" class="flex-1">
           <button id="fetchPrice" type="button" class="px-3 bg-sky-500/20 text-sky-300 border-sky-500/40 hover:bg-sky-500/30 flex items-center justify-center gap-1 shrink-0 text-xs">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 取得
@@ -276,19 +279,19 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
         </div>
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">レバレッジコース</label>
+        <label class="block text-xs font-medium text-slate-400 ">レバレッジコース</label>
         <input id="lev" type="number" min="0.01" step="1" value="10">
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">ロスカット率 (%)</label>
+        <label class="block text-xs font-medium text-slate-400 ">ロスカット率 (%)</label>
         <input id="lcRate" type="number" min="0" max="100" step="1" value="30">
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">平均スワップポイント (円 / 1万通貨 / 日)</label>
+        <label class="block text-xs font-medium text-slate-400 ">平均スワップポイント ( / 1万通貨 日)</label>
         <input id="swap" type="number" step="0.1" value="20">
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-400 mb-1">平均経過日数 (日)</label>
+        <label class="block text-xs font-medium text-slate-400 ">平均経過日数 (日)</label>
         <input id="days" type="number" min="0" step="1" value="30">
       </div>
     </div>
@@ -296,8 +299,8 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
 
   <!-- Positions Section -->
   <section class="glass-card rounded-2xl p-4">
-    <div class="flex justify-between items-center mb-4">
-      <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+    <div class="flex justify-between items-center mb-2">
+      <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1">
         <i data-lucide="layers" class="w-4 h-4 text-sky-400"></i>
         建玉一覧 (Open Positions)
       </div>
@@ -305,16 +308,16 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
         <i data-lucide="plus" class="w-4 h-4"></i> 建玉を追加
       </button>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2 text-xs text-slate-400 px-1 font-medium">
+    <div class="grid grid-cols-2 gap-3 mb-2 text-xs text-slate-400 px-1 font-medium">
       <span>建玉単価 (Entry Rate)</span>
       <span>数量 (+買い / -売り 万通貨)</span>
     </div>
-    <div id="positions" class="space-y-2.5"></div>
+    <div id="positions"></div>
   </section>
 
   <!-- Formula / Notes Section -->
   <section class="glass-card rounded-2xl p-4 text-slate-400">
-    <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2 mb-2">
+    <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1 mb-2">
       <i data-lucide="help-circle" class="w-4 h-4 text-sky-400"></i>
       計算ロジック・仕様
     </div>
@@ -342,7 +345,7 @@ const STORAGE_KEY = "fx-simulator-pro-v3";
 
 const addRow = (rate, qty) => {
   const row = document.createElement("div");
-  row.className = "grid grid-cols-[1fr_1fr_40px] gap-2 items-center bg-slate-900/40 p-2 rounded-xl border border-slate-800/80";
+  row.className = "grid grid-cols-[1fr_1fr_40px] gap-1 items-center bg-slate-900/40 p-1 rounded-xl";
   row.innerHTML = `<input class="entry" type="number" min="0.001" step="0.001" value="${rate}"><input class="qty" type="number" step="1" value="${qty}"><button type="button" aria-label="削除" class="h-[42px] flex items-center justify-center text-slate-400 hover:text-rose-400 hover:border-rose-500/50 bg-slate-900/80">×</button>`;
   row.querySelectorAll("input").forEach(x => x.addEventListener("input", update));
   row.querySelector("button").addEventListener("click", () => { row.remove(); update(); });
