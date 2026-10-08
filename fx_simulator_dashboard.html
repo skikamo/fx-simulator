@@ -93,7 +93,7 @@ button:hover {
 }
 
 /* SVG Chart styling */
-svg { width: 100%; height: 150px; display: block; }
+svg { width: 100%; height: 170px; display: block; }
 svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
 .gridline { stroke: rgba(255,255,255,0.06); stroke-dasharray: 3 3; }
 .zero { stroke: var(--muted); stroke-dasharray: 4 4; stroke-opacity: 0.5; }
@@ -148,7 +148,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
         損益・ロスカット分析グラフ
       </div>
     </div> -->
-    <div class="chartbox rounded-xl bg-slate-950/40">
+    <div class="chartbox rounded-xl bg-slate-950/40" style="margin: 10px -16px;">
       <svg id="chart" viewBox="0 0 700 260" aria-label="ドル円と総合評価損益"></svg>
     </div><!-- 
   </div> -->
@@ -197,7 +197,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
       <div class="my-1">
         <div id="equity" class="metric-value text-3xl sm:text-4xl font-black text-slate-100 tracking-tight">-</div>
       </div>
-      <div class="grid grid-cols-2 gap-1 mt-3 pt-3 border-t border-slate-800/80 text-xs">
+      <div class="grid grid-cols-2 gap-1 mt-1 pt-3 border-t border-slate-800/80 text-xs">
         <div>
           <div class="text-[10px] text-slate-400">建玉金額 (Notional)</div>
           <div id="notional" class="font-bold text-sm text-slate-200 mt-0.5">-</div>
