@@ -89,16 +89,29 @@ svg text{font-family:inherit;fill:var(--muted);font-size:11px}
 
 
 
-<div class="result">
-  <div class="key">必要保証金 / 実効レバレッジ</div>
+<div class="result small">
+  <div class="key">必要保証金 / 保証金維持率</div>
   <div class="result-combined">
     <div id="margin" class="main-value">-</div>/
+    <div id="status" class="sub-value">-</div>
+  </div>
+</div>
+
+<div class="result small"><div class="key">建玉余力 / 注文可能数量</div><div class="result-combined"><div id="free" class="main-value">-</div>/<div id="orderQty" class="sub-value">-</div></div></div>
+
+
+<!-- <div class="result small"><div class="key">建玉金額</div><div id="notional" class="value">-</div></div> -->
+
+
+<div class="result small">
+  <div class="key">建玉金額 / 実効レバレッジ</div>
+  <div class="result-combined">
+    <div id="notional" class="main-value">-</div>/
     <div id="efflev" class="sub-value">-</div>
   </div>
 </div>
 
-<div class="result"><div class="key">建玉余力 / 注文可能数量</div><div class="result-combined"><div id="free" class="main-value">-</div>/<div id="orderQty" class="sub-value">-</div></div></div>
-<div class="result small"><div class="key">建玉金額</div><div id="notional" class="value">-</div></div>
+
 <div class="result small"><div class="key">ロスカット ドル/円</div><div id="lc" class="value bad">-</div></div>
 </div>
 <div id="status" class="status"></div>
@@ -399,9 +412,9 @@ const update = () => {
   if (m.equity <= 0) {
     $("status").innerHTML = '<span class="bad">実質保証金が0円以下です。</span>';
   } else if (ratio <= m.lcRate) {
-    $("status").innerHTML = `<span class="bad">ロスカット水準に達しています。保証金維持率 ${(ratio * 100).toFixed(1)}%</span>`;
+    $("status").innerHTML = `<span class="bad">ロスカット 保証金維持率 ${(ratio * 100).toFixed(1)}%</span>`;
   } else {
-    $("status").textContent = `保証金維持率 ${(ratio * 100).toFixed(1)}% / ロスカット基準 ${(m.lcRate * 100).toFixed(0)}%`;
+    $("status").textContent = `${(ratio * 100).toFixed(1)}%`;
   }
 
   // $("scenario").innerHTML = [-10, -5, 0, 5, 10].map(d => {
