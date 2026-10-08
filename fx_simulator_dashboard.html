@@ -217,7 +217,7 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
       <div class="space-y-1 mb-3">
         <div class="flex justify-between text-[11px] text-slate-400">
           <span>ロスカットライン</span>
-          <span>警告 (100%)</span>
+          <span>警告 (150%)</span>
           <span>安全圏 (300%以上)</span>
         </div>
         <div class="w-full h-3.5 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-800 relative shadow-inner">
@@ -592,7 +592,7 @@ let barColor;
 
 if (!Number.isFinite(ratio) || ratio * 100 >= 200) {
   // 安全圏に近い → グリーン
-  barColor = "linear-gradient(90deg, #991b1b, #22c55e)";
+  barColor = "linear-gradient(90deg, #bbbb00, #22c55e)";
 } else if (ratio * 100 >= 150) {
   // 安全圏へ接近 → 黄緑
   barColor = "linear-gradient(90deg, #f59e0b, #84cc16)";
