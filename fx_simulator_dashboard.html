@@ -215,10 +215,10 @@ svg text { font-family: inherit; fill: var(--muted); font-size: 11px; }
 
       <!-- Visual Progress Bar for Margin Level -->
       <div class="space-y-1 mb-1">
-        <div class="flex justify-between text-[11px] text-slate-400 items-end">
+        <div class="grid grid-cols-3 text-[11px] text-slate-400 items-end">
           <span>ロスカット: <span id="lc" class="font-black text-sm text-rose-400">-</span></span>
-          <span>警告 (150%)</span>
-          <span>安全圏 (300%以上)</span>
+          <span class="text-center">安全圏 (150%)</span>
+          <span class="text-right">300%</span>
         </div>
         <div class="w-full h-3.5 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-800 relative shadow-inner">
           <div id="marginProgressBar" class="h-full w-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-400" style="background-size: 300% 100%; background-position: 0% 0%;"></div>
